@@ -1,5 +1,6 @@
 package application;
 	
+import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -24,20 +25,27 @@ public class Main extends Application {
 	Group root = new Group();
 	Group gameWindow = new Group();
 	Group movingShape = new Group();
+	BoardChecker checker = new BoardChecker(blockWidth, blockHeight);
+	boolean isGameOver = false;
 
 	@Override
 	public void start(Stage primaryStage) {
 		primaryStage.setTitle("TetrisFX");
 		
-		BoardChecker checker = new BoardChecker(blockWidth, blockHeight);
+
 		root.getChildren().add(gameWindow);
 		root.getChildren().add(movingShape);
 		
 		currentShape = new Tetromino();
 		drawShape(currentShape);
 		
-		Timeline gameTime = new Timeline(
-				new KeyFrame(Duration.seconds(1), e -> {
+		AnimationTimer timer = new AnimationTimer() {
+
+			long lastUpdate = 0;
+			long gameSpeed = 1000_000_000;
+			@Override
+			public void handle(long now) {
+				if(now - lastUpdate >= gameSpeed) {
 					if(currentShape.canMoveDown(rows - 2, gameBoard)) {
 						removeShape(currentShape);
 						currentShape.moveDown();
@@ -46,18 +54,21 @@ public class Main extends Application {
 					else {
 						gameWindow.getChildren().clear();
 						movingShape.getChildren().clear();
-						
+
 						addToBoard(currentShape);
 						checker.checkBoard(gameBoard);
 						drawBoard(gameBoard, gameWindow);
 
 						currentShape = new Tetromino();
 						drawShape(currentShape);
+						gameSpeed = getGameSpeed(checker.getLinesCleared());
 					}
-				})
-			);
-		gameTime.setCycleCount(Timeline.INDEFINITE);
-		gameTime.play();
+
+					lastUpdate = now;
+				}				
+			}};
+			
+			timer.start();
 		
 		Scene scene = new Scene(root, windowWidth, windowHeight);
 		scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) ->{
@@ -92,6 +103,21 @@ public class Main extends Application {
 	
 	public static void main(String[] args) {
 		launch(args);
+	}
+	
+	public long getGameSpeed(int linesCleared) {
+		switch(linesCleared) {
+		case 0 :
+			return 1000_000_000;
+		case 10:
+			return 750_000_000;
+		case 20:
+			return 500_000_000;
+		case 30:
+			return 250_000_000;
+		default:
+			return 250_000_000;
+		}
 	}
 	
 	public void printBoard() {

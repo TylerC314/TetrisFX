@@ -9,6 +9,7 @@ public class BoardChecker {
 	private int firstRow = 0;
 	private int blockWidth = 0;
 	private int blockHeight = 0;
+	private int linesCleared = 0;
 	
 	public BoardChecker(int blockWidth, int blockHeight) {
 		this.blockWidth = blockWidth;
@@ -19,6 +20,13 @@ public class BoardChecker {
 		for(int i = 0; i < board.length; ++i) {
 			if(rowIsFull(board, i)) {
 				clearRow(board, i);
+				if(linesCleared <= 30) {
+					++linesCleared;
+				}
+				else {
+					continue;
+				}
+
 				++rowCounter;
 				if(firstRow == 0) {
 					firstRow = i;
@@ -63,5 +71,13 @@ public class BoardChecker {
 		for(int i = 0; i < board[row].length; ++i) {
 			board[row][i] = null;
 		}
+	}
+	
+	public int getLinesCleared() {
+		return linesCleared;
+	}
+	
+	public void setLinesCleared(int lines) {
+		linesCleared = lines;
 	}
 }
