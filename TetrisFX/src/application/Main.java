@@ -1,11 +1,8 @@
 package application;
 	
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -27,22 +24,22 @@ public class Main extends Application {
 	Group movingShape = new Group();
 	BoardChecker checker = new BoardChecker(blockWidth, blockHeight);
 	boolean isGameOver = false;
+	AnimationTimer timer;
 
 	@Override
 	public void start(Stage primaryStage) {
 		primaryStage.setTitle("TetrisFX");
 		
-
 		root.getChildren().add(gameWindow);
 		root.getChildren().add(movingShape);
 		
 		currentShape = new Tetromino();
 		drawShape(currentShape);
 		
-		AnimationTimer timer = new AnimationTimer() {
+		timer = new AnimationTimer() {
 
 			long lastUpdate = 0;
-			long gameSpeed = 1000_000_000;
+			long gameSpeed = getGameSpeed(checker.getLinesCleared());
 			@Override
 			public void handle(long now) {
 				if(now - lastUpdate >= gameSpeed) {
@@ -67,7 +64,6 @@ public class Main extends Application {
 					lastUpdate = now;
 				}				
 			}};
-			
 			timer.start();
 		
 		Scene scene = new Scene(root, windowWidth, windowHeight);
@@ -106,17 +102,17 @@ public class Main extends Application {
 	}
 	
 	public long getGameSpeed(int linesCleared) {
-		switch(linesCleared) {
-		case 0 :
-			return 1000_000_000;
-		case 10:
+		if(linesCleared >= 10) {
 			return 750_000_000;
-		case 20:
+		}
+		else if(linesCleared >= 20) {
 			return 500_000_000;
-		case 30:
+		}
+		else if(linesCleared >= 30){
 			return 250_000_000;
-		default:
-			return 250_000_000;
+		}
+		else {
+			return 1000_000_000;
 		}
 	}
 	
@@ -178,10 +174,6 @@ public class Main extends Application {
 		for(int row = 0; row < board.length; row++) {
 			for(int column = 0; column < board[row].length; column++) {
 				if(board[row][column] != null) {
-//					Rectangle square = new Rectangle(column * blockWidth, row * blockHeight, blockWidth, blockHeight);
-//					square.setFill(board[row][column].getFill());
-//					square.setStroke(board[row][column].getStroke());
-//					board[row][column] = square;
 					group.getChildren().add(board[row][column]);
 				}
 			}
