@@ -12,6 +12,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 public class Main extends Application {
 	int windowWidth = 400;
@@ -29,6 +31,7 @@ public class Main extends Application {
 	BoardChecker checker = new BoardChecker(blockWidth, blockHeight);
 	boolean isGameOver = false;
 	AnimationTimer timer;
+	Text gameOverText;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -40,40 +43,75 @@ public class Main extends Application {
 		Line screenSplitter = new Line(windowWidth / 2, 0, windowWidth / 2, windowHeight);
 		root.getChildren().add(screenSplitter);
 		
-		currentShape = new Tetromino();
-		drawShape(currentShape);
-		
 		timer = new AnimationTimer() {
 
 			long lastUpdate = 0;
 			long gameSpeed = getGameSpeed(checker.getLinesCleared());
 			@Override
 			public void handle(long now) {
-				if(now - lastUpdate >= gameSpeed) {
-					if(currentShape.canMoveDown(rows - 2, gameBoard)) {
-						removeShape(currentShape);
-						currentShape.moveDown();
-						drawShape(currentShape);
+				root.getChildren().remove(gameOverText);
+				if(isGameOver == true) {
+					timer.stop();
+					movingShape.getChildren().clear();
+					gameBoard = new Rectangle[rows][columns];
+					root.getChildren().add(gameOverText);
+				}
+				else {
+					if(now - lastUpdate >= gameSpeed) {
+						if(currentShape.canMoveDown(rows - 2, gameBoard)) {
+							removeShape(currentShape);
+							currentShape.moveDown();
+							drawShape(currentShape);
+						}
+						else {
+							gameWindow.getChildren().clear();
+							movingShape.getChildren().clear();
+
+							addToBoard(currentShape);
+							checker.checkBoard(gameBoard);
+							drawBoard(gameBoard, gameWindow);
+							
+							currentShape = new Tetromino();
+							if(checker.isGameOver(gameBoard) != true && currentShape.canDrawShape(gameBoard)) {
+								drawShape(currentShape);
+								gameSpeed = getGameSpeed(checker.getLinesCleared());
+							}
+							else {
+								isGameOver = true;
+							}
+
+						}
+
+						lastUpdate = now;
 					}
-					else {
-						gameWindow.getChildren().clear();
-						movingShape.getChildren().clear();
-
-						addToBoard(currentShape);
-						checker.checkBoard(gameBoard);
-						drawBoard(gameBoard, gameWindow);
-
-						currentShape = new Tetromino();
-						drawShape(currentShape);
-						gameSpeed = getGameSpeed(checker.getLinesCleared());
-					}
-
-					lastUpdate = now;
-				}				
+				}
 			}};
-			timer.start();
+			
+			gameOverText = new Text("Game Over!");
+			gameOverText.setFont(new Font(25));
+			gameOverText.setLayoutX(windowWidth / 2 + gameOverText.getLayoutBounds().getWidth() / 4);
+			gameOverText.setLayoutY(windowHeight / 2 - gameOverText.getLayoutBounds().getHeight());
+			gameOverText.setFill(Color.WHITE);
+			
+			Button startButton = new Button("Start");
+			startButton.setOnAction(e ->{
+				isGameOver = false;
+				gameWindow.getChildren().clear();
+				currentShape = new Tetromino(new Point(5, -1));
+				drawShape(currentShape);
+				timer.start();
+			});
+			
+			Double buttonWidth = 50.0;
+			Double buttonHeight = 25.0;
+			
+			startButton.setPrefWidth(buttonWidth);
+			startButton.setPrefHeight(buttonHeight);
+			startButton.setLayoutX((windowWidth / 4) - buttonWidth / 2);
+			startButton.setLayoutY(windowHeight / 2 - buttonHeight / 2);
+			root.getChildren().add(startButton);
 		
-		Scene scene = new Scene(root, windowWidth, windowHeight);
+		Scene scene = new Scene(root, windowWidth, windowHeight, Color.GRAY);
 		scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) ->{
 			if(key.getCode() == KeyCode.A && currentShape.canMoveLeft(gameBoard)) {
 				removeShape(currentShape);
@@ -87,7 +125,7 @@ public class Main extends Application {
 				drawShape(currentShape);
 			}
 			
-			if(key.getCode() == KeyCode.S && currentShape.canMoveDown(rows - 2, gameBoard)) {
+			if(key.getCode() == KeyCode.S && currentShape.canMoveDown(rows - 2, gameBoard) && isGameOver != true) {
 				removeShape(currentShape);
 				currentShape.moveDown();
 				drawShape(currentShape);
@@ -163,18 +201,6 @@ public class Main extends Application {
 			square.setFill(shape.getColor());
 			square.setStroke(Color.BLACK);
 			gameBoard[row][column] = square;
-		}
-	}
-	
-	public void setShapeOnBoard(Tetromino shape) {
-		for(int i = 0 ; i < shape.getCurrentPosLength(); ++i) {
-			int column = shape.getCurrentPosIndex(i).getX();
-			int row = shape.getCurrentPosIndex(i).getY();
-			Rectangle square = new Rectangle(column * blockWidth, row * blockHeight, blockWidth, blockHeight);
-			square.setFill(shape.getColor());
-			square.setStroke(Color.BLACK);
-			gameBoard[row][column] = square;
-			gameWindow.getChildren().add(gameBoard[row][column]);
 		}
 	}
 	

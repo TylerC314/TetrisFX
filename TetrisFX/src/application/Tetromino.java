@@ -29,6 +29,14 @@ public class Tetromino {
 		setCurrentPos();
 	}
 	
+	public Tetromino(Point startingPoint) {
+		int selector = rand.nextInt(7);
+		this.startingPoint = startingPoint;
+		this.coords = shapes[selector];
+		this.color = setColor(selector);
+		setCurrentPos();
+	}
+	
 	public Tetromino(Tetromino other) {
 		this.startingPoint = other.startingPoint;
 		this.coords = other.coords;
@@ -179,6 +187,16 @@ public class Tetromino {
 			
 			//Other block in the way
 			if(board[y][x] != null) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public boolean canDrawShape(Rectangle[][] board) {
+		for(int i = 0; i < this.currentPos.length; ++i) {
+			if(board[currentPos[i].getY()][currentPos[i].getX()] != null) {
 				return false;
 			}
 		}

@@ -79,4 +79,13 @@ public class BoardChecker {
 	public void setLinesCleared(int lines) {
 		linesCleared = lines;
 	}
+	
+	public boolean isGameOver(Rectangle[][] board){
+		for(int column = 0; column < board[0].length;  ++column) {
+			if(board[0][column] != null) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
