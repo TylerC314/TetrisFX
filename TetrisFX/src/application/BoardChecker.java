@@ -1,6 +1,5 @@
 package application;
 
-import javafx.scene.Group;
 import javafx.scene.shape.Rectangle;
 
 public class BoardChecker {
@@ -54,7 +53,7 @@ public class BoardChecker {
 		for(int column = 0; column < board[row1].length; ++column) {
 			if(board[row2][column] != null) {
 				Rectangle block = board[row2][column];
-				Rectangle replacementBlock = new Rectangle(column * blockWidth, row1 * blockHeight, blockWidth, blockHeight);
+				Rectangle replacementBlock = new Rectangle(column * blockWidth + 200, row1 * blockHeight, blockWidth, blockHeight);
 				replacementBlock.setFill(block.getFill());
 				replacementBlock.setStroke(block.getStroke());
 				board[row1][column] = replacementBlock;

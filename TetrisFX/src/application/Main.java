@@ -5,17 +5,21 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 public class Main extends Application {
-	int windowWidth = 200;
-	int windowHeight = windowWidth * 11 / 5;
+	int windowWidth = 400;
+//	int windowHeight = windowWidth * 11 / 5;
+	int windowHeight = 440;
 	static int rows = 22;
 	static int columns = 10;
-	int blockWidth = windowWidth / columns;
+	int blockWidth = (windowWidth - 200) / columns;
 	int blockHeight = windowHeight / rows;
 	Rectangle[][] gameBoard = new Rectangle[rows][columns];
 	Tetromino currentShape;
@@ -32,6 +36,9 @@ public class Main extends Application {
 		
 		root.getChildren().add(gameWindow);
 		root.getChildren().add(movingShape);
+		
+		Line screenSplitter = new Line(windowWidth / 2, 0, windowWidth / 2, windowHeight);
+		root.getChildren().add(screenSplitter);
 		
 		currentShape = new Tetromino();
 		drawShape(currentShape);
@@ -94,6 +101,7 @@ public class Main extends Application {
 			}
 		});
 		primaryStage.setScene(scene);
+
 		primaryStage.show();
 	}
 	
@@ -133,7 +141,7 @@ public class Main extends Application {
 	
 	public void drawShape(Tetromino shape){
 		for(int i = 0; i < shape.getCurrentPosLength(); ++i) {
-			Rectangle square = new Rectangle(shape.getCurrentPosIndex(i).getX() * blockWidth,
+			Rectangle square = new Rectangle(shape.getCurrentPosIndex(i).getX() * blockWidth + 200,
 											 shape.getCurrentPosIndex(i).getY() * blockHeight,
 											 blockWidth, blockHeight);
 			
@@ -151,7 +159,7 @@ public class Main extends Application {
 		for(int i = 0; i < shape.getCurrentPosLength(); ++i) {
 			int column = shape.getCurrentPosIndex(i).getX();
 			int row = shape.getCurrentPosIndex(i).getY();
-			Rectangle square = new Rectangle(column * blockWidth, row * blockHeight, blockWidth, blockHeight);
+			Rectangle square = new Rectangle(column * blockWidth + 200, row * blockHeight, blockWidth, blockHeight);
 			square.setFill(shape.getColor());
 			square.setStroke(Color.BLACK);
 			gameBoard[row][column] = square;
